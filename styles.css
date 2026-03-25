@@ -12,6 +12,10 @@
     --shadow-out-hover: 12px 12px 20px #c8c8cf, -12px -12px 20px #ffffff;
     --shadow-in: inset 6px 6px 10px 0 #d1d1d4, inset -6px -6px 10px 0 #ffffff;
     --shadow-in-deep: inset 10px 10px 15px 0 #c8c8cf, inset -10px -10px 15px 0 #ffffff;
+
+    /* Base Font Size Values (without rem unit for JS interaction) */
+    --base-font-size-val: 2.2;
+    --price-font-size-val: 4.0;
 }
 
 * {
@@ -211,7 +215,7 @@ input[type="text"]:focus {
 #priceInput {
     background: transparent;
     border: none;
-    font-size: 4rem;
+    font-size: calc(var(--price-font-size-val) * 1rem);
     font-weight: 200;
     width: 100%;
     padding: 0;
@@ -302,7 +306,7 @@ input[type="text"]:focus {
 
 /* Thinner typography for the numbers */
 .time-display {
-    font-size: 2.2rem;
+    font-size: calc(var(--base-font-size-val) * 1rem);
     font-weight: 200; 
     line-height: 1.2;
     white-space: nowrap; 
@@ -319,6 +323,17 @@ input[type="text"]:focus {
 /* Life Matrix Visualizer */
 .life-matrix-panel {
     text-align: center;
+}
+
+.dob-input-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.dob-input-wrapper .input-group {
+    width: 100%;
+    max-width: 260px;
 }
 
 input[type="date"] {
@@ -564,27 +579,55 @@ input:checked + .slider:before {
     }
 }
 
+/* Large Mobile (≤ 720px) — Price input scales down before cramping */
+@media (max-width: 720px) {
+    :root { --price-font-size-val: 3.0; }
+    .currency-symbol { font-size: 2.5rem; }
+    .highlight-panel { padding: 2.5rem 1.5rem; }
+}
+
 /* Mobile (≤ 650px) */
 @media (max-width: 650px) {
+    :root { 
+        --base-font-size-val: 1.8;
+        --price-font-size-val: 2.2;
+    }
     /* Typography */
     .title { font-size: 2.2rem; }
     .marketing-copy { font-size: 1rem; }
-    .main-question { font-size: 1.4rem; }
+    .main-question { font-size: 1.3rem; }
 
     /* Layout */
     .container { padding: 2rem 1rem; gap: 2rem; }
     .card-panel { padding: 1.5rem; border-radius: 20px; }
+    .highlight-panel { padding: 2rem 1rem; }
+    .results-container { gap: 2.5rem; }
+    .concept-section { gap: 1.2rem; }
 
     /* Inputs */
-    .input-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .input-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+    }
+    /* DOB input: full width on small screens */
+    .dob-input-wrapper .input-group {
+        max-width: 100%;
+    }
     input[type="text"] { font-size: 1rem; padding: 0.8rem 1rem; }
-    #priceInput { font-size: 2.5rem; }
-    .currency-symbol { font-size: 2rem; }
+    input[type="date"] { font-size: 1rem; padding: 0.8rem 1rem; }
+    .currency-symbol { font-size: 1.8rem; }
+    .price-input-wrapper { padding: 0.4rem 1rem; }
+
+    /* Result cards */
+    .time-display {
+        white-space: normal;
+        word-break: break-word;
+    }
 
     /* Matrix — tighter dots */
     .matrix-container { gap: 1px; }
 
-    /* Matrix axis labels — hide to save space, dots speak for themselves */
+    /* Matrix axis labels — hide to save space */
     .x-axis-label { display: none; }
     .y-axis-title { display: none; }
 
@@ -593,18 +636,55 @@ input:checked + .slider:before {
 
     /* Controls */
     .matrix-controls { padding: 0 0.5rem; gap: 1rem; margin-bottom: 2rem; }
-    .toggle-wrapper { flex-direction: column; text-align: center; gap: 0.6rem; padding: 0.8rem 1rem; }
+    .toggle-wrapper {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.6rem;
+        padding: 0.8rem 1rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
     .toggle-label { font-size: 0.8rem; }
 
     /* Legend */
     .matrix-legend { flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
     .legend-item { font-size: 0.75rem; }
+
+    /* Section headers */
+    .section-header h2 { font-size: 1.2rem; }
+    .panel-title { font-size: 1rem; margin-bottom: 1.2rem; }
+}
+
+/* Small Mobile (≤ 480px) */
+@media (max-width: 480px) {
+    :root { 
+        --base-font-size-val: 1.6;
+        --price-font-size-val: 2.0;
+    }
+    .title { font-size: 1.9rem; }
+    .input-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .card-panel { padding: 1.2rem; border-radius: 16px; }
+    .highlight-panel { padding: 1.5rem 1rem; }
+    .currency-symbol { font-size: 1.6rem; }
+    .minimal-card { padding: 1.4rem; gap: 1rem; }
+    .matrix-container { gap: 1px; }
+    .cards-grid { gap: 1rem; }
+    .results-container { gap: 2.5rem; }
+    .action-btn { padding: 0.9rem 1.8rem; font-size: 1rem; }
 }
 
 /* Very small (≤ 380px) */
 @media (max-width: 380px) {
-    .title { font-size: 1.8rem; }
+    :root { 
+        --base-font-size-val: 1.4;
+        --price-font-size-val: 1.8;
+    }
+    .title { font-size: 1.6rem; }
+    .container { padding: 1.5rem 0.75rem; }
     .input-grid { grid-template-columns: 1fr; }
     .matrix-container { gap: 0px; }
     .matrix-controls { padding: 0; }
+    .currency-symbol { font-size: 1.4rem; }
+    .card-panel { padding: 1rem; border-radius: 14px; }
 }

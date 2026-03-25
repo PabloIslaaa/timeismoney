@@ -173,8 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Auto scale down any time-display that overflows its container
         const displays = document.querySelectorAll('.time-display');
         displays.forEach(el => {
-            el.style.fontSize = '2.2rem'; 
-            let currentSize = 2.2;
+            const baseSize = window.getComputedStyle(el).getPropertyValue('--base-font-size-val') || '2.2';
+            el.style.fontSize = baseSize + 'rem'; 
+            let currentSize = parseFloat(baseSize);
             while (el.scrollWidth > el.clientWidth && currentSize > 0.8) {
                 currentSize -= 0.1;
                 el.style.fontSize = currentSize + 'rem';
@@ -183,19 +184,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Price input scale
         const pin = document.getElementById("priceInput");
-        if(pin.scrollWidth > pin.clientWidth && pin.clientWidth > 0) {
-            let inSize = parseFloat(window.getComputedStyle(pin).fontSize) / 16; 
-            while(pin.scrollWidth > pin.clientWidth && inSize > 1) {
-                inSize -= 0.2;
-                pin.style.fontSize = inSize + 'rem';
-            }
-        } else {
-             pin.style.fontSize = '4rem'; 
-             let inSize = 4.0;
-             while(pin.scrollWidth > pin.clientWidth && inSize > 1) {
-                inSize -= 0.2;
-                pin.style.fontSize = inSize + 'rem';
-            }
+        if (!pin) return;
+        
+        const basePriceSize = window.getComputedStyle(pin).getPropertyValue('--price-font-size-val') || '4.0';
+        pin.style.fontSize = basePriceSize + 'rem';
+        let inSize = parseFloat(basePriceSize);
+
+        while(pin.scrollWidth > pin.clientWidth && inSize > 1) {
+            inSize -= 0.2;
+            pin.style.fontSize = inSize + 'rem';
         }
     }
 
