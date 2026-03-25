@@ -1,0 +1,610 @@
+:root {
+    /* Neumorphism Clean Light Base (Whites/Grays) */
+    --bg-neu: #f0f0f3;
+    
+    /* Text Colors */
+    --text-main: #171717; /* Near Black */
+    --text-muted: #737373; /* Medium Gray */
+    --accent-red: #dc2626; /* Punctual Red for Contrast */
+
+    /* Shadows tailored for #f0f0f3 */
+    --shadow-out: 9px 9px 16px #d1d1d4, -9px -9px 16px #ffffff;
+    --shadow-out-hover: 12px 12px 20px #c8c8cf, -12px -12px 20px #ffffff;
+    --shadow-in: inset 6px 6px 10px 0 #d1d1d4, inset -6px -6px 10px 0 #ffffff;
+    --shadow-in-deep: inset 10px 10px 15px 0 #c8c8cf, inset -10px -10px 15px 0 #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-neu);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+    line-height: 1.5;
+}
+
+/* Layout */
+.container {
+    max-width: 900px;
+    width: 100%;
+    padding: 4rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+/* Typography & Copy */
+.main-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.title {
+    font-size: 3.5rem;
+    font-weight: 300; 
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    color: var(--text-main);
+    text-shadow: 2px 2px 4px rgba(209, 209, 212, 0.5), -2px -2px 4px rgba(255,255,255, 0.8);
+}
+
+.title .accent {
+    font-weight: 500;
+    color: var(--accent-red); /* Contrast Red */
+}
+
+.marketing-copy {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+    font-weight: 300;
+}
+
+.panel-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    color: var(--text-main);
+}
+
+/* Neumorphic Panels */
+.card-panel {
+    background: var(--bg-neu);
+    border-radius: 30px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-out);
+    border: none;
+}
+
+/* UX Interaction States */
+.disabled-panel {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: all 0.4s ease;
+}
+
+.input-locked {
+    box-shadow: none !important;
+    background: transparent !important;
+    border: 1px solid rgba(209, 209, 212, 0.3) !important;
+    color: var(--text-muted) !important;
+    cursor: default;
+}
+
+.config-actions {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.action-btn {
+    background: var(--bg-neu);
+    color: var(--accent-red); /* Punctual contrast */
+    border: none;
+    border-radius: 20px;
+    padding: 1rem 2.8rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    box-shadow: var(--shadow-out);
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    box-shadow: var(--shadow-out-hover);
+}
+
+.action-btn:active, .action-btn.edit-mode {
+    box-shadow: var(--shadow-in);
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Inputs & Form */
+.input-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 5px;
+}
+
+/* Support for custom text format inputs as numeric */
+input[type="text"] {
+    background: var(--bg-neu);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    outline: none;
+    box-shadow: var(--shadow-in);
+    transition: all 0.2s ease;
+}
+
+input[type="text"]:focus {
+    box-shadow: var(--shadow-in-deep);
+}
+
+/* Main Price Input */
+.highlight-panel {
+    text-align: center;
+    padding: 3.5rem;
+}
+
+.main-question {
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+}
+
+.price-input-wrapper {
+    display: flex;
+    justify-content: center;
+    background: var(--bg-neu);
+    border-radius: 20px;
+    box-shadow: var(--shadow-in);
+    padding: 0.5rem 1.5rem;
+    transition: box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.price-input-wrapper:focus-within {
+    box-shadow: var(--shadow-in-deep);
+}
+
+.currency-symbol {
+    font-size: 3rem;
+    font-weight: 200;
+    color: var(--accent-red); /* Contrast Red */
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+#priceInput {
+    background: transparent;
+    border: none;
+    font-size: 4rem;
+    font-weight: 200;
+    width: 100%;
+    padding: 0;
+    color: var(--text-main);
+    box-shadow: none;
+    min-width: 0;
+}
+#priceInput:disabled {
+    color: transparent; 
+    text-shadow: 0px 0px 0px rgba(209, 209, 212, 0.6);
+}
+#priceInput:focus {
+    box-shadow: none;
+}
+#priceInput::placeholder {
+    color: rgba(209, 209, 212, 0.6);
+}
+
+/* Results Section */
+.results-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    opacity: 0.1;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.results-container.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.concept-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+}
+
+.section-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 300;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+}
+
+.minimal-card {
+    background: var(--bg-neu);
+    border-radius: 20px;
+    box-shadow: var(--shadow-out);
+    padding: 2rem;
+    border: none;
+    transition: box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.minimal-card:hover {
+    box-shadow: var(--shadow-out-hover);
+}
+
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+/* Thinner typography for the numbers */
+.time-display {
+    font-size: 2.2rem;
+    font-weight: 200; 
+    line-height: 1.2;
+    white-space: nowrap; 
+    color: var(--text-main);
+    overflow: hidden;    
+    text-overflow: clip; 
+    width: 100%;         
+}
+
+.time-display strong {
+    font-weight: 600; /* Contrast against the very thin text */
+}
+
+/* Life Matrix Visualizer */
+.life-matrix-panel {
+    text-align: center;
+}
+
+input[type="date"] {
+    background: var(--bg-neu);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    outline: none;
+    box-shadow: var(--shadow-in);
+    transition: all 0.2s ease;
+    cursor: text;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="date"]:focus {
+    box-shadow: var(--shadow-in-deep);
+}
+
+.matrix-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* Inner wrapper needed to allow absolute positioning of y-axis title over y-label column */
+.matrix-inner {
+    position: relative;
+}
+
+.y-axis-title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 500;
+    text-align: right; /* aligns text to the top visually after rotation */
+    pointer-events: none;
+}
+
+.matrix-wrapper {
+    max-width: 800px;
+    width: 100%;
+}
+
+.x-axis-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-align: left;
+    padding-left: 25px; /* skip the 25px y-label column in the grid so text starts at dot column 1 */
+    font-weight: 500;
+}
+
+.matrix-container {
+    display: grid;
+    grid-template-columns: 25px repeat(52, 1fr);
+    gap: 3px;
+    width: 100%;
+    align-items: center;
+}
+
+.y-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-align: right;
+    padding-right: 6px;
+    font-weight: 600;
+}
+
+.week-dot {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    min-width: 0;          /* prevent grid blowout on small viewports */
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: var(--shadow-in);
+    align-self: center;
+    justify-self: center;
+    box-sizing: border-box;
+    transition: background-color 0.25s ease;
+}
+
+.week-dot.lived {
+    background: var(--text-main);
+    box-shadow: none;
+}
+
+.week-dot.savings-cost {
+    background: var(--accent-red);
+    box-shadow: none;
+}
+
+.decade-spacer {
+    grid-column: 1 / -1;
+    height: 4px;
+    border-bottom: 1px solid rgba(209, 209, 212, 0.4); /* subtle line using the grey tone */
+    margin-bottom: 6px;
+    margin-top: 2px;
+}
+
+/* Matrix Controls & Legend */
+.matrix-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-neu);
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-out);
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+/* Toggle Switch Neumorphism */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--bg-neu);
+    box-shadow: var(--shadow-in);
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--text-muted);
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--bg-neu);
+    box-shadow: var(--shadow-in-deep);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+    background-color: var(--accent-red);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.overflow-message {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--accent-red);
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    background: rgba(220, 38, 38, 0.08); /* light red background */
+    border-radius: 15px;
+    border: 1px solid rgba(220, 38, 38, 0.15);
+}
+
+/* Legend */
+.matrix-legend {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-item .week-dot {
+    width: 14px;
+    height: 14px;
+    box-shadow: var(--shadow-in);
+}
+
+.legend-item .week-dot.lived {
+    box-shadow: none;
+}
+
+.legend-item .week-dot.savings-cost {
+    box-shadow: none;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet / narrow desktop (≤ 850px) */
+@media (max-width: 850px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile (≤ 650px) */
+@media (max-width: 650px) {
+    /* Typography */
+    .title { font-size: 2.2rem; }
+    .marketing-copy { font-size: 1rem; }
+    .main-question { font-size: 1.4rem; }
+
+    /* Layout */
+    .container { padding: 2rem 1rem; gap: 2rem; }
+    .card-panel { padding: 1.5rem; border-radius: 20px; }
+
+    /* Inputs */
+    .input-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    input[type="text"] { font-size: 1rem; padding: 0.8rem 1rem; }
+    #priceInput { font-size: 2.5rem; }
+    .currency-symbol { font-size: 2rem; }
+
+    /* Matrix — tighter dots */
+    .matrix-container { gap: 1px; }
+
+    /* Matrix axis labels — hide to save space, dots speak for themselves */
+    .x-axis-label { display: none; }
+    .y-axis-title { display: none; }
+
+    /* Overflow message */
+    .overflow-message { font-size: 0.9rem; padding: 0.8rem 1rem; }
+
+    /* Controls */
+    .matrix-controls { padding: 0 0.5rem; gap: 1rem; margin-bottom: 2rem; }
+    .toggle-wrapper { flex-direction: column; text-align: center; gap: 0.6rem; padding: 0.8rem 1rem; }
+    .toggle-label { font-size: 0.8rem; }
+
+    /* Legend */
+    .matrix-legend { flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
+    .legend-item { font-size: 0.75rem; }
+}
+
+/* Very small (≤ 380px) */
+@media (max-width: 380px) {
+    .title { font-size: 1.8rem; }
+    .input-grid { grid-template-columns: 1fr; }
+    .matrix-container { gap: 0px; }
+    .matrix-controls { padding: 0; }
+}
