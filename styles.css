@@ -422,22 +422,18 @@ input[type="date"]:focus {
     aspect-ratio: 1 / 1;
     min-width: 0;          /* prevent grid blowout on small viewports */
     border-radius: 50%;
-    background: #ffffff;
-    box-shadow: var(--shadow-in);
+    background: rgba(209, 209, 212, 0.4); /* Flat empty state for performance */
     align-self: center;
     justify-self: center;
     box-sizing: border-box;
-    transition: background-color 0.25s ease;
 }
 
 .week-dot.lived {
     background: var(--text-main);
-    box-shadow: none;
 }
 
 .week-dot.savings-cost {
     background: var(--accent-red);
-    box-shadow: none;
 }
 
 .decade-spacer {
@@ -687,4 +683,82 @@ input:checked + .slider:before {
     .matrix-controls { padding: 0; }
     .currency-symbol { font-size: 1.4rem; }
     .card-panel { padding: 1rem; border-radius: 14px; }
+}
+
+/* --- Free Time Grid & Responsive Sync --- */
+.free-time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem 2.5rem;
+    align-items: end;
+}
+
+.free-time-grid .input-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.split-input {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.split-input input {
+    width: 3.8rem;
+    flex: 0 0 3.8rem;
+    min-width: 0;
+    text-align: center;
+    padding: 0.8rem 0.3rem; /* Adjusted for consistency */
+}
+
+/* Sync with global breakpoint: Tablet / Narrow Desktop */
+@media (max-width: 850px) {
+    .free-time-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem 2rem;
+    }
+}
+
+/* Sync with global breakpoint: Mobile Landscape / Large Mobile */
+@media (max-width: 650px) {
+    .free-time-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+    }
+    .split-input input {
+        width: 3.4rem;
+        flex: 0 0 3.4rem;
+        padding: 0.7rem 0.2rem;
+    }
+}
+
+/* Sync with global breakpoint: Small Mobile */
+@media (max-width: 480px) {
+    .free-time-grid {
+        grid-template-columns: 1fr; /* Stack vertically like input-grid */
+        gap: 1rem;
+    }
+    .free-time-grid .input-group {
+        align-items: flex-start; /* Reset alignment for vertical stack */
+        justify-content: flex-start;
+    }
+    .split-input input {
+        width: 3.8rem;
+        flex: 0 0 3.8rem;
+    }
+}
+
+/* Extra small devices wrap */
+@media (max-width: 380px) {
+    .split-input {
+        gap: 0.4rem;
+    }
+    .split-input input {
+        width: 3.2rem;
+        flex: 0 0 3.2rem;
+        font-size: 0.9rem;
+    }
 }

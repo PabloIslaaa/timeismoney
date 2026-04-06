@@ -8,8 +8,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const matrixContainer = document.getElementById('lifeMatrix');
     const showCostToggle = document.getElementById('showCostToggle');
 
+    const dobFreeInput = document.getElementById('dobFree');
+    const sleepHoursInput = document.getElementById('sleepHours');
+    const sleepMinutesInput = document.getElementById('sleepMinutes');
+    const eatMinutesInput = document.getElementById('eatMinutes');
+    const dineMinutesInput = document.getElementById('dineMinutes');
+    const workHoursFreeInput = document.getElementById('workHoursFree');
+    const workMinutesFreeInput = document.getElementById('workMinutesFree');
+    const freeTimeTotalOutput = document.getElementById('free-time-total');
+
     let isConfigSaved = false;
     let currentSavingsLifeWeeks = 0;
+    let matrixDotsCache = [];
+    let freeTimeInterval = null;
 
     // Load config from localStorage
     function loadConfig() {
@@ -17,11 +28,38 @@ document.addEventListener("DOMContentLoaded", () => {
         if(localStorage.getItem('netSalary')) document.getElementById('netSalary').value = localStorage.getItem('netSalary');
         if(localStorage.getItem('workHours')) document.getElementById('workHours').value = localStorage.getItem('workHours');
         if(localStorage.getItem('savings')) document.getElementById('savings').value = localStorage.getItem('savings');
-        if(localStorage.getItem('dob')) dobInput.value = localStorage.getItem('dob');
+        if(localStorage.getItem('dob')) {
+            const savedDob = localStorage.getItem('dob');
+            dobInput.value = savedDob;
+            if(dobFreeInput) dobFreeInput.value = savedDob;
+        }
         
+        // Sync free time work hours
+        if(localStorage.getItem('workHours')) {
+            if(workHoursFreeInput) workHoursFreeInput.value = localStorage.getItem('workHours');
+        }
+
+        // Load other free time inputs (with two-digit padding for minutes)
+        if(localStorage.getItem('sleepHours') && sleepHoursInput) sleepHoursInput.value = localStorage.getItem('sleepHours');
+        if(localStorage.getItem('sleepMinutes') && sleepMinutesInput) {
+            const sm = parseInt(localStorage.getItem('sleepMinutes'), 10);
+            sleepMinutesInput.value = isNaN(sm) ? '00' : String(sm).padStart(2, '0');
+        }
+        if(localStorage.getItem('eatMinutes') && eatMinutesInput) eatMinutesInput.value = localStorage.getItem('eatMinutes');
+        if(localStorage.getItem('dineMinutes') && dineMinutesInput) dineMinutesInput.value = localStorage.getItem('dineMinutes');
+        if(localStorage.getItem('workMinutesFree') && workMinutesFreeInput) {
+            const wm = parseInt(localStorage.getItem('workMinutesFree'), 10);
+            workMinutesFreeInput.value = isNaN(wm) ? '00' : String(wm).padStart(2, '0');
+        }
+
         if(localStorage.getItem('configSaved') === 'true') {
             setTimeout(() => saveConfigBtn.click(), 10);
         }
+        
+        // Start the countdown interval
+        if (freeTimeInterval) clearInterval(freeTimeInterval);
+        freeTimeInterval = setInterval(calculateFreeTime, 1000);
+        calculateFreeTime();
     }
     loadConfig();
 
@@ -61,14 +99,45 @@ document.addEventListener("DOMContentLoaded", () => {
             if (this.id === 'priceInput' && isConfigSaved) {
                 calculate();
             }
+            
+            // Sync work hours to free time section (Hours only, minutes stay separate)
+            if (this.id === 'workHours' && workHoursFreeInput) {
+                workHoursFreeInput.value = this.value;
+                localStorage.setItem('workHours', this.value);
+                calculateFreeTime();
+            }
+            
+            // Re-calculate and save free time if any of its inputs change
+            const freeTimeInputIds = ['sleepHours', 'sleepMinutes', 'eatMinutes', 'dineMinutes', 'workHoursFree', 'workMinutesFree'];
+            if (freeTimeInputIds.includes(this.id)) {
+                localStorage.setItem(this.id, this.value);
+                calculateFreeTime();
+            }
         });
 
         input.addEventListener('focus', function() {
-            if(this.value === "0") this.value = "";
+            if(this.value === "0" || this.value === "00") this.value = "";
         });
 
         input.addEventListener('blur', function() {
-            if(this.value === "") this.value = "0";
+            if(this.value === "") {
+                this.value = this.classList.contains('two-digit-input') ? "00" : "0";
+            }
+        });
+    });
+
+    // Two-digit auto-pad on blur for minute inputs
+    document.querySelectorAll('.two-digit-input').forEach(input => {
+        input.addEventListener('blur', function() {
+            const raw = parseInt(this.value, 10);
+            if (!isNaN(raw)) {
+                this.value = String(raw).padStart(2, '0');
+            } else {
+                this.value = '00';
+            }
+            // Persist
+            localStorage.setItem(this.id, this.value);
+            calculateFreeTime();
         });
     });
 
@@ -247,6 +316,63 @@ document.addEventListener("DOMContentLoaded", () => {
 
     resetOutputs();
 
+    // --- Free Time Calculator Logic ---
+    function calculateFreeTime() {
+        // Find both DOB inputs
+        const currentDobValue = dobInput.value || (dobFreeInput ? dobFreeInput.value : '');
+        if (!currentDobValue || !freeTimeTotalOutput) return;
+        
+        const dob = new Date(currentDobValue);
+        const now = new Date();
+        
+        // 85th birthday
+        const endOfLife = new Date(dob);
+        endOfLife.setFullYear(dob.getFullYear() + 85);
+        
+        if (now >= endOfLife) {
+            freeTimeTotalOutput.innerHTML = "¡Tiempo libre agotado!";
+            if(freeTimeInterval) clearInterval(freeTimeInterval);
+            return;
+        }
+        
+        const msLeft = endOfLife - now;
+        const totalHoursLeftInLife = msLeft / (1000 * 60 * 60);
+        
+        // Daily deductions
+        const sleepH = parseSpanishNumber(sleepHoursInput.value);
+        const sleepM = parseSpanishNumber(sleepMinutesInput.value) / 60;
+        const sleepTotal = sleepH + sleepM;
+
+        const eat = parseSpanishNumber(eatMinutesInput.value) / 60;
+        const dine = parseSpanishNumber(dineMinutesInput.value) / 60;
+        
+        const workH = parseSpanishNumber(workHoursFreeInput.value);
+        const workM = parseSpanishNumber(workMinutesFreeInput.value) / 60;
+        const workTotal = workH + workM;
+        
+        // Average daily work considering 260 working days a year
+        const avgDailyWork = workTotal * (260 / 365);
+        
+        const dailyBurdenHours = sleepTotal + eat + dine + avgDailyWork;
+        const dailyFreeHours = Math.max(0, 24 - dailyBurdenHours);
+        
+        // Free time ratio: dailyFreeHours / 24
+        const freeTimeRatio = dailyFreeHours / 24;
+        
+        const totalFreeHoursLeft = totalHoursLeftInLife * freeTimeRatio;
+        const freeTimeString = formatTime(totalFreeHoursLeft, 24, 365);
+        freeTimeTotalOutput.innerHTML = freeTimeString;
+        
+        // Handle text scaling
+        requestAnimationFrame(() => {
+            if(freeTimeTotalOutput.scrollWidth > freeTimeTotalOutput.clientWidth) {
+               freeTimeTotalOutput.style.fontSize = '1.6rem';
+               freeTimeTotalOutput.style.whiteSpace = 'normal';
+               freeTimeTotalOutput.style.wordBreak = 'break-word';
+            }
+        });
+    }
+
     // --- Life Matrix Visualizer Logic ---
 
     function drawMatrix() {
@@ -254,6 +380,8 @@ document.addEventListener("DOMContentLoaded", () => {
         matrixContainer.innerHTML = '';
         const totalYears = 85; 
         const fragment = document.createDocumentFragment();
+        
+        matrixDotsCache = [];
         
         for (let y = 0; y < totalYears; y++) {
             // Y-Axis label
@@ -268,6 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const dot = document.createElement("div");
                 dot.className = "week-dot";
                 fragment.appendChild(dot);
+                matrixDotsCache.push(dot);
             }
 
             // Subtle decade separator (every 10 years, except the last one)
@@ -308,19 +437,20 @@ document.addEventListener("DOMContentLoaded", () => {
             if (overflowMessage) overflowMessage.style.display = 'none';
         }
         
-        const dots = matrixContainer.querySelectorAll('.week-dot');
-        dots.forEach((dot, index) => {
-            if (index < weeksLived) {
-                dot.classList.add('lived');
-                dot.classList.remove('savings-cost');
-            } else if (showCost && index < weeksLived + currentSavingsLifeWeeks) {
-                dot.classList.remove('lived');
-                dot.classList.add('savings-cost');
-            } else {
-                dot.classList.remove('lived');
-                dot.classList.remove('savings-cost');
+        for (let i = 0; i < matrixDotsCache.length; i++) {
+            const dot = matrixDotsCache[i];
+            let targetClass = 'week-dot';
+            
+            if (i < weeksLived) {
+                targetClass = 'week-dot lived';
+            } else if (showCost && i < weeksLived + currentSavingsLifeWeeks) {
+                targetClass = 'week-dot savings-cost';
             }
-        });
+            
+            if (dot.className !== targetClass) {
+                dot.className = targetClass;
+            }
+        }
     }
 
     if (dobInput) {
@@ -328,10 +458,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // Render initially if a DOB was loaded from storage
         if (dobInput.value) updateMatrix();
         
-        dobInput.addEventListener('change', function() {
-            localStorage.setItem('dob', this.value);
+        const handleDobChange = (e) => {
+            const newVal = e.target.value;
+            localStorage.setItem('dob', newVal);
+            dobInput.value = newVal;
+            if(dobFreeInput) dobFreeInput.value = newVal;
             updateMatrix();
-        });
+            calculateFreeTime();
+        };
+
+        dobInput.addEventListener('change', handleDobChange);
+        if(dobFreeInput) dobFreeInput.addEventListener('change', handleDobChange);
     }
 
     if (showCostToggle) {

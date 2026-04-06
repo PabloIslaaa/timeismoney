@@ -153,6 +153,53 @@
             
             <div id="overflowMessage" class="overflow-message" style="display: none;"></div>
         </section>
+
+        <section class="free-time-panel card-panel">
+            <h2 class="panel-title">Tiempo Libre Restante</h2>
+            <p class="section-desc" style="margin-bottom: 2rem;">Calcula el tiempo real que te queda para disfrutar libremente, descontando tus horas de sueño, comidas y trabajo estimado hasta tus 85 años.</p>
+
+            <div class="free-time-grid">
+                <div class="input-group">
+                    <label for="dobFree">Fecha de Nacimiento</label>
+                    <input type="date" id="dobFree">
+                </div>
+                <div class="input-group">
+                    <label>Trabajo diario</label>
+                    <div class="split-input">
+                        <input type="text" inputmode="numeric" id="workHoursFree" value="0" placeholder="H">
+                        <input type="text" inputmode="numeric" id="workMinutesFree" value="00" placeholder="00" class="two-digit-input">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Sueño diario</label>
+                    <div class="split-input">
+                        <input type="text" inputmode="numeric" id="sleepHours" value="8" placeholder="H">
+                        <input type="text" inputmode="numeric" id="sleepMinutes" value="00" placeholder="00" class="two-digit-input">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Comida (min)</label>
+                    <input type="text" inputmode="numeric" id="eatMinutes" value="60">
+                </div>
+                <div class="input-group">
+                    <label>Cena (min)</label>
+                    <input type="text" inputmode="numeric" id="dineMinutes" value="60">
+                </div>
+            </div>
+
+            <div class="results-container active" style="margin-top: 3rem; opacity: 1; pointer-events: auto;">
+                <article class="concept-section">
+                    <div class="cards-grid">
+                        <div class="result-box minimal-card highlight-card" style="box-shadow: inset 6px 6px 10px 0 #d1d1d4, inset -6px -6px 10px 0 #ffffff;">
+                            <div class="box-header">
+                                <span class="badge highlight-badge">Tiempo puramente libre (Estimado)</span>
+                            </div>
+                            <div class="time-display" id="free-time-total" style="color: var(--accent-red); font-weight: 400;">--</div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
     </main>
 
     <script src="app.js"></script>
