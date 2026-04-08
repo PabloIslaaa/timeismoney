@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentSavingsLifeWeeks = 0;
     let matrixDotsCache = [];
     let freeTimeInterval = null;
+    let baseFreeSeconds = 0;
+    let baseCalculationTimestamp = 0;
 
     // Load config from localStorage
     function loadConfig() {
@@ -56,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => saveConfigBtn.click(), 10);
         }
         
-        // Start the countdown interval
+        // Start the countdown interval at 1s for a real-time clock feel
         if (freeTimeInterval) clearInterval(freeTimeInterval);
         freeTimeInterval = setInterval(calculateFreeTime, 1000);
         calculateFreeTime();
@@ -104,14 +106,14 @@ document.addEventListener("DOMContentLoaded", () => {
             if (this.id === 'workHours' && workHoursFreeInput) {
                 workHoursFreeInput.value = this.value;
                 localStorage.setItem('workHours', this.value);
-                calculateFreeTime();
+                calculateFreeTime(true);
             }
             
             // Re-calculate and save free time if any of its inputs change
             const freeTimeInputIds = ['sleepHours', 'sleepMinutes', 'eatMinutes', 'dineMinutes', 'workHoursFree', 'workMinutesFree'];
             if (freeTimeInputIds.includes(this.id)) {
                 localStorage.setItem(this.id, this.value);
-                calculateFreeTime();
+                calculateFreeTime(true);
             }
         });
 
@@ -137,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             // Persist
             localStorage.setItem(this.id, this.value);
-            calculateFreeTime();
+            calculateFreeTime(true);
         });
     });
 
@@ -303,6 +305,33 @@ document.addEventListener("DOMContentLoaded", () => {
         return parts.join(' ');
     }
 
+    // Dedicated formatter for the free-time countdown — ALWAYS shows seconds, no decimals
+    function formatCountdown(totalSecondsLeft) {
+        if (!totalSecondsLeft || isNaN(totalSecondsLeft) || totalSecondsLeft <= 0) return "--";
+
+        let rem = Math.floor(totalSecondsLeft);
+
+        const secondsPerYear = 365 * 24 * 3600;
+        const secondsPerDay  = 24 * 3600;
+
+        const y = Math.floor(rem / secondsPerYear); rem %= secondsPerYear;
+        const d = Math.floor(rem / secondsPerDay);  rem %= secondsPerDay;
+        const h = Math.floor(rem / 3600);           rem %= 3600;
+        const m = Math.floor(rem / 60);
+        const s = rem % 60;
+
+        const pad = n => String(n).padStart(2, '0');
+
+        let parts = [];
+        if (y > 0) parts.push(`<strong>${y}</strong>a`);
+        if (d > 0 || y > 0) parts.push(`<strong>${d}</strong>d`);
+        if (h > 0 || d > 0 || y > 0) parts.push(`<strong>${h}</strong>h`);
+        parts.push(`<strong>${m}</strong>m`);
+        parts.push(`<strong>${pad(s)}</strong>s`);
+
+        return parts.join(' ');
+    }
+
     function resetOutputs() {
         configMap.forEach(cfg => {
             document.getElementById(`work-${cfg.key}`).innerHTML = "--";
@@ -317,51 +346,48 @@ document.addEventListener("DOMContentLoaded", () => {
     resetOutputs();
 
     // --- Free Time Calculator Logic ---
-    function calculateFreeTime() {
+    function calculateFreeTime(isForceRecalculate = false) {
         // Find both DOB inputs
         const currentDobValue = dobInput.value || (dobFreeInput ? dobFreeInput.value : '');
         if (!currentDobValue || !freeTimeTotalOutput) return;
         
-        const dob = new Date(currentDobValue);
-        const now = new Date();
-        
-        // 85th birthday
-        const endOfLife = new Date(dob);
-        endOfLife.setFullYear(dob.getFullYear() + 85);
-        
-        if (now >= endOfLife) {
-            freeTimeTotalOutput.innerHTML = "¡Tiempo libre agotado!";
-            if(freeTimeInterval) clearInterval(freeTimeInterval);
-            return;
-        }
-        
-        const msLeft = endOfLife - now;
-        const totalHoursLeftInLife = msLeft / (1000 * 60 * 60);
-        
-        // Daily deductions
-        const sleepH = parseSpanishNumber(sleepHoursInput.value);
-        const sleepM = parseSpanishNumber(sleepMinutesInput.value) / 60;
-        const sleepTotal = sleepH + sleepM;
+        // If it's a forced recalculate (input change) or we don't have a base yet, refresh the base pool
+        if (isForceRecalculate || baseFreeSeconds === 0) {
+            const dob = new Date(currentDobValue);
+            const now = new Date();
+            const endOfLife = new Date(dob);
+            endOfLife.setFullYear(dob.getFullYear() + 85);
+            
+            if (now >= endOfLife) {
+                freeTimeTotalOutput.innerHTML = "¡Tiempo libre agotado!";
+                return;
+            }
+            
+            const msLeft = endOfLife - now;
+            const secondsLeftTotal = msLeft / 1000;
 
-        const eat = parseSpanishNumber(eatMinutesInput.value) / 60;
-        const dine = parseSpanishNumber(dineMinutesInput.value) / 60;
+            const sleepH = parseSpanishNumber(sleepHoursInput.value);
+            const sleepM = parseSpanishNumber(sleepMinutesInput.value) / 60;
+            const sleepTotal = sleepH + sleepM;
+            const eat = parseSpanishNumber(eatMinutesInput.value) / 60;
+            const dine = parseSpanishNumber(dineMinutesInput.value) / 60;
+            const workH = parseSpanishNumber(workHoursFreeInput.value);
+            const workM = parseSpanishNumber(workMinutesFreeInput.value) / 60;
+            const workTotal = workH + workM;
+            const avgDailyWork = workTotal * (260 / 365);
+            const dailyBurdenHours = sleepTotal + eat + dine + avgDailyWork;
+            const dailyFreeHours = Math.max(0, 24 - dailyBurdenHours);
+            const freeTimeRatio = dailyFreeHours / 24;
+
+            baseFreeSeconds = secondsLeftTotal * freeTimeRatio;
+            baseCalculationTimestamp = Date.now();
+        }
+
+        // Ticking logic: decrement exactly 1 second per real second based on the last calculation point
+        const elapsedSeconds = (Date.now() - baseCalculationTimestamp) / 1000;
+        const currentPool = Math.max(0, baseFreeSeconds - elapsedSeconds);
         
-        const workH = parseSpanishNumber(workHoursFreeInput.value);
-        const workM = parseSpanishNumber(workMinutesFreeInput.value) / 60;
-        const workTotal = workH + workM;
-        
-        // Average daily work considering 260 working days a year
-        const avgDailyWork = workTotal * (260 / 365);
-        
-        const dailyBurdenHours = sleepTotal + eat + dine + avgDailyWork;
-        const dailyFreeHours = Math.max(0, 24 - dailyBurdenHours);
-        
-        // Free time ratio: dailyFreeHours / 24
-        const freeTimeRatio = dailyFreeHours / 24;
-        
-        const totalFreeHoursLeft = totalHoursLeftInLife * freeTimeRatio;
-        const freeTimeString = formatTime(totalFreeHoursLeft, 24, 365);
-        freeTimeTotalOutput.innerHTML = freeTimeString;
+        freeTimeTotalOutput.innerHTML = formatCountdown(currentPool);
         
         // Handle text scaling
         requestAnimationFrame(() => {
@@ -464,7 +490,7 @@ document.addEventListener("DOMContentLoaded", () => {
             dobInput.value = newVal;
             if(dobFreeInput) dobFreeInput.value = newVal;
             updateMatrix();
-            calculateFreeTime();
+            calculateFreeTime(true);
         };
 
         dobInput.addEventListener('change', handleDobChange);
